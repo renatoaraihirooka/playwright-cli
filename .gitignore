@@ -1,0 +1,9 @@
+# Maven build output and test reports
+target/
+
+# Playwright reports and test artifacts
+playwright-report/
+test-results/
+
+# Node.js dependencies
+node_modules/
