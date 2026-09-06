@@ -1,10 +1,8 @@
-# Maven build output and test reports
 target/
-
-# Playwright reports and test artifacts
+.idea/
+*.iml
+.vscode/
 playwright-report/
 test-results/
+# Playwright CLI output (may contain credentials)
 .playwright-cli/
-
-# Node.js dependencies
-node_modules/
