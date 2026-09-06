@@ -28,4 +28,39 @@ Para executar somente o teste smoke:
 mvn -Dtest=SmokeTest test
 ```
 
+Para executar o teste exploratorio do campo de texto:
+
+```bash
+mvn -Dtest=SimpleInputTest test
+```
+
+## Visualizar o relatorio Allure
+
+Depois da execucao dos testes, gere e abra o relatorio:
+
+```bash
+npx allure-commandline generate target/allure-results --clean -o target/allure-report
+npx allure-commandline open target/allure-report
+```
+
+## Configurar evidencias
+
+Altere `src/main/resources/test.properties`:
+
+```properties
+evidence.mode=ALL_ACTIONS
+```
+
+Modos disponíveis:
+
+- `ALL_ACTIONS`: captura após cada ação e validação, além da tela final.
+- `FINAL_SCREEN`: captura somente a tela final de cada teste.
+- `FAILURE_ONLY`: captura somente a primeira evidência quando o teste falhar.
+
+Para sobrescrever o modo temporariamente sem alterar o arquivo:
+
+```bash
+mvn -Devidence.mode=FAILURE_ONLY test
+```
+
 O teste usa Chromium em modo headless por padrão. Para depurar visualmente, altere `setHeadless(false)` em `PlaywrightTestBase`.

@@ -4,5 +4,6 @@ target/
 .vscode/
 playwright-report/
 test-results/
+allure-results/
 # Playwright CLI output (may contain credentials)
 .playwright-cli/

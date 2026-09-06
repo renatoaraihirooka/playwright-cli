@@ -6,6 +6,70 @@ allowed-tools: Bash(playwright-cli:*) Bash(npx:*) Bash(npm:*)
 
 # Browser Automation with playwright-cli
 
+## Evidencias e relatorios
+
+Para projetos Java + Maven + JUnit 5 + Playwright Java, use o **Allure Report** como relatorio principal. Mantenha tambem o relatorio XML do Maven Surefire para integracao com CI.
+
+Toda acao que alterar ou validar o estado da pagina deve gerar uma evidencia visual imediatamente depois da acao:
+
+- navegacao: `goto`, `reload`, `go-back`, `go-forward`
+- interacao: `click`, `dblclick`, `fill`, `type`, `press`, `check`, `uncheck`, `select`, `upload`, `drop`
+- validacao: `find`, `eval` usado como assertiva e qualquer verificacao de texto, estado ou visibilidade
+- dialogs, mudanca de aba e operacoes de armazenamento quando afetarem a tela
+
+Depois de cada comando acima, execute `screenshot` e associe a imagem a etapa correspondente no Allure. Use nomes estaveis e descritivos, por exemplo `01-login-fill-email.png` e `02-login-click-submit.png`. Nao capture screenshots de comandos puramente diagnosticos como `snapshot`, `console`, `requests`, `request`, `list` e `tab-list`, exceto quando forem solicitados como evidencia.
+
+O screenshot deve ser capturado mesmo quando a acao falhar, sempre que a sessao continuar disponivel. Em testes Java, centralize essa regra em helpers ou wrappers de acao para evitar que uma etapa seja executada sem anexo. Nao capture valores de senha, tokens, cookies ou outros segredos em screenshots ou anexos.
+
+### Configuracao Allure para Java
+
+Inclua a integracao JUnit 5 do Allure como dependencia de teste e anexe cada screenshot ao resultado da etapa:
+
+```xml
+<properties>
+	<allure.version>2.29.1</allure.version>
+</properties>
+
+<dependency>
+	<groupId>io.qameta.allure</groupId>
+	<artifactId>allure-junit5</artifactId>
+	<version>${allure.version}</version>
+	<scope>test</scope>
+</dependency>
+```
+
+Use `@Step` para nomear as acoes e `Allure.addAttachment` para anexar a imagem:
+
+```java
+@Step("Clicar em {description}")
+void clickWithEvidence(String description, Locator locator) {
+	try {
+		locator.click();
+	} finally {
+		attachScreenshot(description);
+	}
+}
+
+private void attachScreenshot(String action) {
+	byte[] screenshot = page.screenshot(new Page.ScreenshotOptions().setFullPage(true));
+	Allure.addAttachment(action, "image/png", new ByteArrayInputStream(screenshot), ".png");
+}
+```
+
+Repita o mesmo padrao para preenchimento, selecao, upload e validacao. Para uma falha inesperada fora dos wrappers, use um `@AfterEach` para anexar uma ultima captura e o trace do Playwright. O screenshot por acao e complementar ao screenshot final de falha, nao um substituto.
+
+### Gerar e abrir o relatorio
+
+```bash
+mvn test
+npx allure-commandline generate target/allure-results --clean -o target/allure-report
+npx allure-commandline open target/allure-report
+```
+
+Caso o projeto ja tenha o Allure CLI instalado globalmente, os dois comandos podem ser escritos como `allure generate ...` e `allure open ...`. Para uso repetido, instale a ferramenta no projeto com `npm install --save-dev allure-commandline` e use `npx allure ...`.
+
+Em CI, publique `target/allure-results`, `target/allure-report`, screenshots e traces como artefatos. Nao use `allure serve` em pipelines, pois ele inicia um servidor temporario.
+
 ## Quick start
 
 ```bash
