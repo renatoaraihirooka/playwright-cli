@@ -4,6 +4,7 @@ target/
 # Playwright reports and test artifacts
 playwright-report/
 test-results/
+.playwright-cli/
 
 # Node.js dependencies
 node_modules/
